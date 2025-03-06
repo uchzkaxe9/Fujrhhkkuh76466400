@@ -4,35 +4,34 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.chrome.service import Service
 from webdriver_manager.chrome import ChromeDriverManager
+import os
 import time
 
 app = Flask(__name__)
 
+# Install Chrome & ChromeDriver on Render
+chrome_options = webdriver.ChromeOptions()
+chrome_options.binary_location = "/usr/bin/google-chrome"
+chrome_options.add_argument("--headless")  # Run in headless mode
+chrome_options.add_argument("--no-sandbox")
+chrome_options.add_argument("--disable-dev-shm-usage")
+
 def scrape_vehicle_details(reg_number):
-    """Scrape vehicle details from Parivahan (VAHAN) website"""
-
-    url = "https://vahan.parivahan.gov.in/nrservices/faces/user/searchstatus.xhtml"
-
-    options = webdriver.ChromeOptions()
-    options.add_argument("--headless")  # Run without opening browser
-    options.add_argument("--no-sandbox")
-    options.add_argument("--disable-dev-shm-usage")
+    """Scrapes vehicle details from Parivahan website"""
 
     service = Service(ChromeDriverManager().install())
-    driver = webdriver.Chrome(service=service, options=options)
+    driver = webdriver.Chrome(service=service, options=chrome_options)
 
     try:
+        url = "https://vahan.parivahan.gov.in/nrservices/faces/user/searchstatus.xhtml"
         driver.get(url)
-        time.sleep(3)  # Wait for page to load
+        time.sleep(3)
 
-        # Find the search input box and enter the vehicle number
         search_box = driver.find_element(By.ID, "regn_no1_exact")
         search_box.send_keys(reg_number)
         search_box.send_keys(Keys.RETURN)
+        time.sleep(5)
 
-        time.sleep(5)  # Allow data to load
-
-        # Extract details
         vehicle_info = {}
 
         try:
@@ -50,7 +49,7 @@ def scrape_vehicle_details(reg_number):
         return vehicle_info
 
     finally:
-        driver.quit()  # Close the browser
+        driver.quit()
 
 @app.route('/vehicle', methods=['GET'])
 def get_vehicle():
