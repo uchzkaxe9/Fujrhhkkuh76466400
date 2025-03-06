@@ -38,25 +38,9 @@ def scrape_vehicle_details(reg_number):
         try:
             vehicle_info["Vehicle Number"] = reg_number
             vehicle_info["Owner Name"] = driver.find_element(By.XPATH, "//td[contains(text(),'Owner Name')]/following-sibling::td").text
-            vehicle_info["Insurance Expiry Date"] = driver.find_element(By.XPATH, "//td[contains(text(),'Insurance Validity')]/following-sibling::td").text
             vehicle_info["Registration Date"] = driver.find_element(By.XPATH, "//td[contains(text(),'Registration Date')]/following-sibling::td").text
-            vehicle_info["Owner Role"] = "OWNER"
-            vehicle_info["Sell Eligible"] = False
-            vehicle_info["Probable Vehicle Type"] = driver.find_element(By.XPATH, "//td[contains(text(),'Vehicle Class')]/following-sibling::td").text
             vehicle_info["Vehicle Model"] = driver.find_element(By.XPATH, "//td[contains(text(),'Maker / Model')]/following-sibling::td").text
-            vehicle_info["Owner Count"] = driver.find_element(By.XPATH, "//td[contains(text(),'Owner Serial No')]/following-sibling::td").text
             vehicle_info["Fuel Type"] = driver.find_element(By.XPATH, "//td[contains(text(),'Fuel Type')]/following-sibling::td").text
-            vehicle_info["Chassis Number"] = driver.find_element(By.XPATH, "//td[contains(text(),'Chassis No')]/following-sibling::td").text
-            vehicle_info["Engine Number"] = driver.find_element(By.XPATH, "//td[contains(text(),'Engine No')]/following-sibling::td").text
-            vehicle_info["Insurance Provider"] = "HDFC ERGO General Insurance Company Ltd"  # Fake data (Real API needed)
-            vehicle_info["Pincode"] = "undefined"
-            vehicle_info["Is Commercial"] = False
-            vehicle_info["User ID"] = "67114917ed2d815947f62b13"
-            vehicle_info["Date of Insurance Expiry"] = vehicle_info["Insurance Expiry Date"]
-            vehicle_info["Insurance Expired"] = False
-            vehicle_info["Expiring Today"] = False
-            vehicle_info["App Open"] = 1
-            vehicle_info["Owner Mobile"] = "NA"
         except:
             return {"error": "Vehicle details not found or CAPTCHA detected"}
 
