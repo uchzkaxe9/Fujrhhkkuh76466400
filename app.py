@@ -4,25 +4,29 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.chrome.service import Service
 from webdriver_manager.chrome import ChromeDriverManager
+import os
 import time
 
 app = Flask(__name__)
 
+# ✅ Define Chrome & ChromeDriver Paths for Render
+CHROME_BINARY_PATH = "/opt/render/project/.render/chrome"
+CHROMEDRIVER_PATH = "/opt/render/project/.render/chromedriver"
+
+chrome_options = webdriver.ChromeOptions()
+chrome_options.binary_location = CHROME_BINARY_PATH
+chrome_options.add_argument("--headless")  # ✅ Headless mode to run on server
+chrome_options.add_argument("--no-sandbox")
+chrome_options.add_argument("--disable-dev-shm-usage")
+
 def scrape_vehicle_details(reg_number):
     """Scrapes vehicle details from Parivahan website"""
 
-    url = "https://vahan.parivahan.gov.in/nrservices/faces/user/searchstatus.xhtml"
-
-    options = webdriver.ChromeOptions()
-    options.add_argument("--headless")  # Run in headless mode
-    options.add_argument("--no-sandbox")
-    options.add_argument("--disable-dev-shm-usage")
-
-    service = Service(ChromeDriverManager().install())
-    driver = webdriver.Chrome(service=service, options=options)
+    service = Service(CHROMEDRIVER_PATH)
+    driver = webdriver.Chrome(service=service, options=chrome_options)
 
     try:
-        driver.get(url)
+        driver.get("https://vahan.parivahan.gov.in/nrservices/faces/user/searchstatus.xhtml")
         time.sleep(3)  # Wait for page to load
 
         # Enter Vehicle Number
@@ -60,4 +64,5 @@ def get_vehicle():
     return jsonify(vehicle_data)
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    port = int(os.environ.get("PORT", 10000))  # ✅ Render ke liye port set karo
+    app.run(host="0.0.0.0", port=port, debug=True)
