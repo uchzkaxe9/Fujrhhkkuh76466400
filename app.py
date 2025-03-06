@@ -1,32 +1,66 @@
-from flask import Flask, render_template, request, jsonify
-import os
+from flask import Flask, request, jsonify
+from selenium import webdriver
+from selenium.webdriver.common.by import By
+from selenium.webdriver.common.keys import Keys
+from selenium.webdriver.chrome.service import Service
+from webdriver_manager.chrome import ChromeDriverManager
+import time
 
 app = Flask(__name__)
 
-@app.route('/')
-def home():
-    return render_template('index.html')
+def scrape_vehicle_details(reg_number):
+    """Scrape vehicle details from Parivahan (VAHAN) website"""
 
-@app.route('/vehicle', methods=['POST'])
-def get_vehicle_details():
-    reg_number = request.form.get("reg_number")
-    
+    url = "https://vahan.parivahan.gov.in/nrservices/faces/user/searchstatus.xhtml"
+
+    options = webdriver.ChromeOptions()
+    options.add_argument("--headless")  # Run without opening browser
+    options.add_argument("--no-sandbox")
+    options.add_argument("--disable-dev-shm-usage")
+
+    service = Service(ChromeDriverManager().install())
+    driver = webdriver.Chrome(service=service, options=options)
+
+    try:
+        driver.get(url)
+        time.sleep(3)  # Wait for page to load
+
+        # Find the search input box and enter the vehicle number
+        search_box = driver.find_element(By.ID, "regn_no1_exact")
+        search_box.send_keys(reg_number)
+        search_box.send_keys(Keys.RETURN)
+
+        time.sleep(5)  # Allow data to load
+
+        # Extract details
+        vehicle_info = {}
+
+        try:
+            vehicle_info["Vehicle Number"] = reg_number
+            vehicle_info["Owner Name"] = driver.find_element(By.XPATH, "//td[contains(text(),'Owner Name')]/following-sibling::td").text
+            vehicle_info["Registration Date"] = driver.find_element(By.XPATH, "//td[contains(text(),'Registration Date')]/following-sibling::td").text
+            vehicle_info["Insurance Expiry Date"] = driver.find_element(By.XPATH, "//td[contains(text(),'Insurance Validity')]/following-sibling::td").text
+            vehicle_info["Vehicle Model"] = driver.find_element(By.XPATH, "//td[contains(text(),'Maker / Model')]/following-sibling::td").text
+            vehicle_info["Fuel Type"] = driver.find_element(By.XPATH, "//td[contains(text(),'Fuel Type')]/following-sibling::td").text
+            vehicle_info["Chassis Number"] = driver.find_element(By.XPATH, "//td[contains(text(),'Chassis No')]/following-sibling::td").text
+            vehicle_info["Engine Number"] = driver.find_element(By.XPATH, "//td[contains(text(),'Engine No')]/following-sibling::td").text
+        except:
+            return {"error": "Vehicle details not found or CAPTCHA detected"}
+
+        return vehicle_info
+
+    finally:
+        driver.quit()  # Close the browser
+
+@app.route('/vehicle', methods=['GET'])
+def get_vehicle():
+    reg_number = request.args.get('reg_number')
+
     if not reg_number:
-        return jsonify({"error": "Please enter a vehicle registration number!"}), 400
-    
-    # Dummy response (replace this with actual API/Scraper)
-    vehicle_data = {
-        "Registration Number": reg_number,
-        "Owner Name": "John Doe",
-        "Vehicle Type": "Sedan",
-        "Fuel Type": "Petrol",
-        "Chassis Number": "XXXXX12345",
-        "Engine Number": "XXXXX56789",
-        "Registration Date": "2023-05-12"
-    }
-    
+        return jsonify({"error": "Please provide a vehicle registration number!"}), 400
+
+    vehicle_data = scrape_vehicle_details(reg_number)
     return jsonify(vehicle_data)
 
 if __name__ == "__main__":
-    port = int(os.environ.get("PORT", 5000))
-    app.run(host="0.0.0.0", port=port, debug=True)
+    app.run(debug=True)
