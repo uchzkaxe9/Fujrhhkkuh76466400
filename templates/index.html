@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Vehicle Details Lookup</title>
+</head>
+<body>
+    <h1>Enter Vehicle Registration Number</h1>
+    <form method="POST">
+        <input type="text" name="reg_number" placeholder="Enter Vehicle Number" required>
+        <button type="submit">Get Details</button>
+    </form>
+
+    {% if vehicle_data %}
+        <h2>Vehicle Information</h2>
+        {% if "error" in vehicle_data %}
+            <p style="color: red;">{{ vehicle_data.error }}</p>
+        {% else %}
+            <ul>
+                {% for key, value in vehicle_data.items() %}
+                    <li><strong>{{ key }}:</strong> {{ value }}</li>
+                {% endfor %}
+            </ul>
+        {% endif %}
+    {% endif %}
+</body>
+</html>
