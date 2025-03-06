@@ -9,12 +9,7 @@ import time
 
 app = Flask(__name__)
 
-# ✅ Define Chrome & ChromeDriver Paths for Render
-CHROME_BINARY_PATH = "/opt/render/project/.render/chrome"
-CHROMEDRIVER_PATH = "/opt/render/project/.render/chromedriver"
-
 chrome_options = webdriver.ChromeOptions()
-chrome_options.binary_location = CHROME_BINARY_PATH
 chrome_options.add_argument("--headless")  # ✅ Headless mode to run on server
 chrome_options.add_argument("--no-sandbox")
 chrome_options.add_argument("--disable-dev-shm-usage")
@@ -22,7 +17,7 @@ chrome_options.add_argument("--disable-dev-shm-usage")
 def scrape_vehicle_details(reg_number):
     """Scrapes vehicle details from Parivahan website"""
 
-    service = Service(CHROMEDRIVER_PATH)
+    service = Service(ChromeDriverManager().install())  # ✅ Use WebDriverManager for automatic driver install
     driver = webdriver.Chrome(service=service, options=chrome_options)
 
     try:
