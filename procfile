@@ -1,0 +1,1 @@
+web: /bin/bash build.sh && gunicorn app:app
