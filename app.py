@@ -9,12 +9,12 @@ import time
 
 app = Flask(__name__)
 
-# Define Chrome & ChromeDriver Paths (Download from External Source)
-chrome_binary_path = "/opt/render/project/chrome-linux64/chrome"
-chromedriver_path = "/opt/render/project/chromedriver-linux64/chromedriver"
+# ✅ Define Chrome & ChromeDriver Paths (For Render)
+CHROME_PATH = "/opt/google/chrome/google-chrome"
+CHROMEDRIVER_PATH = "/opt/chrome/chromedriver"
 
 chrome_options = webdriver.ChromeOptions()
-chrome_options.binary_location = chrome_binary_path
+chrome_options.binary_location = CHROME_PATH
 chrome_options.add_argument("--headless")
 chrome_options.add_argument("--no-sandbox")
 chrome_options.add_argument("--disable-dev-shm-usage")
@@ -22,7 +22,7 @@ chrome_options.add_argument("--disable-dev-shm-usage")
 def scrape_vehicle_details(reg_number):
     """Scrapes vehicle details from Parivahan website"""
 
-    service = Service(chromedriver_path)
+    service = Service(CHROMEDRIVER_PATH)
     driver = webdriver.Chrome(service=service, options=chrome_options)
 
     try:
