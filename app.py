@@ -4,34 +4,36 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.chrome.service import Service
 from webdriver_manager.chrome import ChromeDriverManager
-import os
 import time
+import os
 
 app = Flask(__name__)
 
+# ✅ Chrome Options for Headless Mode on Render
 chrome_options = webdriver.ChromeOptions()
-chrome_options.add_argument("--headless")  # ✅ Headless mode to run on server
+chrome_options.add_argument("--headless")  # ✅ Headless mode (No GUI)
 chrome_options.add_argument("--no-sandbox")
 chrome_options.add_argument("--disable-dev-shm-usage")
 
 def scrape_vehicle_details(reg_number):
     """Scrapes vehicle details from Parivahan website"""
 
-    service = Service(ChromeDriverManager().install())  # ✅ Use WebDriverManager for automatic driver install
+    # ✅ Auto-install ChromeDriver
+    service = Service(ChromeDriverManager().install())
     driver = webdriver.Chrome(service=service, options=chrome_options)
 
     try:
         driver.get("https://vahan.parivahan.gov.in/nrservices/faces/user/searchstatus.xhtml")
         time.sleep(3)  # Wait for page to load
 
-        # Enter Vehicle Number
+        # ✅ Enter Vehicle Number
         search_box = driver.find_element(By.ID, "regn_no1_exact")
         search_box.send_keys(reg_number)
         search_box.send_keys(Keys.RETURN)
 
         time.sleep(5)  # Allow data to load
 
-        # Extract Details
+        # ✅ Extract Details
         vehicle_info = {}
 
         try:
@@ -47,6 +49,10 @@ def scrape_vehicle_details(reg_number):
 
     finally:
         driver.quit()
+
+@app.route('/')
+def home():
+    return jsonify({"message": "Server is running!"})
 
 @app.route('/vehicle', methods=['GET'])
 def get_vehicle():
